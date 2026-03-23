@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>fsh</title>
+  <title>Free Shower Head</title>
   <style>
     body {
       font-family: -apple-system, sans-serif;
@@ -70,56 +70,77 @@
 </div>
 
 <script>
-  // List of 30+ sales reps
+  // List of sales reps with first + last names
   const salesReps = [
-    "Michael","Alice","Bob","Charlie","Diana","Eve","Frank","Grace","Hannah",
-    "Ian","Jack","Karen","Leo","Mona","Nina","Oscar","Pam","Quincy","Rachel",
-    "Steve","Tina","Uma","Victor","Wendy","Xander","Yara","Zane","Abby","Brian",
-    "Cathy"
+    "Michael A","Amelie L","Elliot N","Steven L","Maddie J","Joe M",
+    "Eduardo T","Emmo O","John M","Kevin P",
+    "Brody C","Ahsan A","Michaela T","Stephanie C","Gavin T",
+    "Haprielle J","Kaedence B","Carmen C","Rico E","Hope H",
+    "William V","Manas R","Derrick M","Bryan Steffens","Cass I"
   ];
+const kingstonReps = [
+  "Stephanie","Gavin","Haprielle","Kaedence","Hope",
+  "William","Derrick","Bryan","Cass"
+];
 
   const select = document.getElementById("salesRep");
   const status = document.getElementById("status");
 
   // Populate dropdown
-  function renderDropdown(list) {
-    select.innerHTML = '<option value="">-- Select your name --</option>';
-    list.forEach(rep => {
-      const option = document.createElement("option");
-      option.value = rep.toLowerCase();
-      option.textContent = rep;
-      select.appendChild(option);
-    });
-  }
-
-  renderDropdown(salesReps);
-
-  // Make dropdown searchable on mobile: type to jump to matching options
-  select.addEventListener("input", () => {
-    // On most mobile browsers, this is handled natively in the select element
-    // If needed, a more advanced searchable select can be added with JS libraries
+  salesReps.forEach(rep => {
+    const option = document.createElement("option");
+    option.value = rep; // store full name
+    option.textContent = rep;
+    select.appendChild(option);
   });
 
-  function getMessage(repId) {
-    return `I got a new Spa Shower Head from a company in Kingston and Ottawa.
-They have given me the opportunity for any of my family or friends to get one FREE like I did. This shower head also removes chlorine from your shower. If you would like to get one just fill out their quick questionnaire and complete the test just like I did!
-https://getyourshowerhead.ca/free-ott?am_id=${repId}`;
+  // Convert full name to am_id: first name + first letter of last name
+function getRepId(fullName) {
+  const parts = fullName.trim().split(" ");
+  
+  if (parts.length < 2) {
+    // fallback if something weird happens
+    return fullName.charAt(0).toUpperCase() + fullName.slice(1);
   }
 
-  document.getElementById("copyBtn").onclick = async () => {
-    const repId = select.value;
-    if (!repId) { alert("Please select your name"); return; }
+  const firstName = parts[0];
+  const lastInitial = parts[1].charAt(0);
 
-    const message = getMessage(repId);
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
+       + lastInitial.toUpperCase();
+}
+
+  function getMessage(fullName) {
+  const repId = getRepId(fullName);
+
+  const firstName = fullName.split(" ")[0];
+
+  const isKingston = kingstonReps.includes(firstName);
+
+  const baseLink = isKingston
+    ? "https://getyourshowerhead.ca/free-kng"
+    : "https://getyourshowerhead.ca/free-ott";
+
+  return `I got a new Spa Shower Head from a company in Kingston and Ottawa.
+They have given me the opportunity for any of my family or friends to get one FREE like I did. This shower head also removes chlorine from your shower. If you would like to get one just fill out their quick questionnaire and complete the test just like I did!
+${baseLink}?am_id=${repId}`;
+}
+
+  document.getElementById("copyBtn").onclick = async () => {
+    const repFullName = select.value;
+    if (!repFullName) { alert("Please select your name"); return; }
+
+    const message = getMessage(repFullName);
     await navigator.clipboard.writeText(message);
     status.textContent = "Copied! Now you can paste it anywhere.";
   };
 
   document.getElementById("fbBtn").onclick = () => {
-    const repId = select.value;
-    if (!repId) { alert("Please select your name"); return; }
+    const repFullName = select.value;
+    if (!repFullName) { alert("Please select your name"); return; }
 
-    const message = getMessage(repId);
+    const repId = getRepId(repFullName);
+    const message = getMessage(repFullName);
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://getyourshowerhead.ca/free-ott?am_id=' + repId)}&quote=${encodeURIComponent(message)}`;
     window.open(fbUrl, '_blank');
   };

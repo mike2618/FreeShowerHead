@@ -41,12 +41,15 @@
       font-size: 18px;
       border: none;
       border-radius: 12px;
-      background: #1877f2;
+      margin-bottom: 12px;
       color: white;
       font-weight: bold;
     }
 
+    #copyBtn { background: #28a745; }   /* Green for copy */
+    #fbBtn { background: #1877f2; }     /* Facebook blue */
     button:active { opacity: 0.9; }
+
     .status { margin-top: 15px; color: green; font-size: 14px; }
   </style>
 </head>
@@ -54,56 +57,71 @@
 
 <div class="box">
   <h1>🎁 Get Your Free Shower Head</h1>
-  <p>Select your sales rep and tap to share on Facebook</p>
+  <p>Select your sales rep and choose an action</p>
 
   <select id="salesRep">
     <option value="">-- Select your name --</option>
   </select>
 
-  <button id="shareBtn">Share on Facebook</button>
+  <button id="copyBtn">Copy Message</button>
+  <button id="fbBtn">Share on Facebook</button>
 
   <div id="status" class="status"></div>
 </div>
 
 <script>
-  // List of sales reps
+  // List of 30+ sales reps
   const salesReps = [
-    "Michael",
-    "Alice",
-    "Bob",
-    "Charlie",
-    "Diana"
+    "Michael","Alice","Bob","Charlie","Diana","Eve","Frank","Grace","Hannah",
+    "Ian","Jack","Karen","Leo","Mona","Nina","Oscar","Pam","Quincy","Rachel",
+    "Steve","Tina","Uma","Victor","Wendy","Xander","Yara","Zane","Abby","Brian",
+    "Cathy"
   ];
 
   const select = document.getElementById("salesRep");
-
-  // Populate dropdown
-  salesReps.forEach(rep => {
-    const option = document.createElement("option");
-    option.value = rep.toLowerCase();
-    option.textContent = rep;
-    select.appendChild(option);
-  });
-
-  const btn = document.getElementById("shareBtn");
   const status = document.getElementById("status");
 
-  btn.onclick = () => {
-    const repId = select.value;
-    if (!repId) {
-      alert("Please select your name");
-      return;
-    }
+  // Populate dropdown
+  function renderDropdown(list) {
+    select.innerHTML = '<option value="">-- Select your name --</option>';
+    list.forEach(rep => {
+      const option = document.createElement("option");
+      option.value = rep.toLowerCase();
+      option.textContent = rep;
+      select.appendChild(option);
+    });
+  }
 
-    const message = `I got a new Spa Shower Head from a company in Kingston and Ottawa.
+  renderDropdown(salesReps);
+
+  // Make dropdown searchable on mobile: type to jump to matching options
+  select.addEventListener("input", () => {
+    // On most mobile browsers, this is handled natively in the select element
+    // If needed, a more advanced searchable select can be added with JS libraries
+  });
+
+  function getMessage(repId) {
+    return `I got a new Spa Shower Head from a company in Kingston and Ottawa.
 They have given me the opportunity for any of my family or friends to get one FREE like I did. This shower head also removes chlorine from your shower. If you would like to get one just fill out their quick questionnaire and complete the test just like I did!
 https://getyourshowerhead.ca/free-ott?am_id=${repId}`;
+  }
 
-    // Facebook share URL (opens Facebook app or web)
-    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://getyourshowerhead.ca/free-ott?am_id=' + repId)}&quote=${encodeURIComponent(message)}`;
+  document.getElementById("copyBtn").onclick = async () => {
+    const repId = select.value;
+    if (!repId) { alert("Please select your name"); return; }
 
-    // Open in new tab/window
-    window.open(fbShareUrl, '_blank');
+    const message = getMessage(repId);
+    await navigator.clipboard.writeText(message);
+    status.textContent = "Copied! Now you can paste it anywhere.";
+  };
+
+  document.getElementById("fbBtn").onclick = () => {
+    const repId = select.value;
+    if (!repId) { alert("Please select your name"); return; }
+
+    const message = getMessage(repId);
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://getyourshowerhead.ca/free-ott?am_id=' + repId)}&quote=${encodeURIComponent(message)}`;
+    window.open(fbUrl, '_blank');
   };
 </script>
 

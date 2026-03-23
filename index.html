@@ -135,16 +135,7 @@ ${baseLink}?am_id=${repId}`;
     status.textContent = "Copied! Now you can paste it anywhere.";
   };
 
-  document.getElementById("fbBtn").onclick = () => {
-    const repFullName = select.value;
-    if (!repFullName) { alert("Please select your name"); return; }
-
-    const repId = getRepId(repFullName);
-    const message = getMessage(repFullName);
-    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://getyourshowerhead.ca/free-ott?am_id=' + repId)}&quote=${encodeURIComponent(message)}`;
-    window.open(fbUrl, '_blank');
-  };
-</script>
+  </script>
 
 </body>
 </html>

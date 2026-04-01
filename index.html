@@ -32,8 +32,17 @@
       padding: 14px;
       font-size: 16px;
       border-radius: 12px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
+
+    .city {
+      font-size: 14px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .ottawa { color: #28a745; }
+    .kingston { color: #007bff; }
 
     button {
       width: 100%;
@@ -46,8 +55,10 @@
       font-weight: bold;
     }
 
-    #copyBtn { background: #28a745; }   /* Green for copy */
-    #fbBtn { background: #1877f2; }     /* Facebook blue */
+    #copyBtn { background: #28a745; }
+    #referralBtn { background: #ff9800; }
+    #reviewBtn { background: #444; }
+
     button:active { opacity: 0.9; }
 
     .status { margin-top: 15px; color: green; font-size: 14px; }
@@ -63,13 +74,16 @@
     <option value="">-- Select your name --</option>
   </select>
 
-  <button id="copyBtn">Copy Message</button>
+  <div id="cityIndicator" class="city"></div>
+
+  <button id="copyBtn">Copy Facebook Message</button>
+  <button id="referralBtn">View Referral Prizes</button>
+  <button id="reviewBtn">Leave a Google Review</button>
 
   <div id="status" class="status"></div>
 </div>
 
 <script>
-  // List of sales reps with first + last names
   const salesReps = [
     "Michael A","Amelie L","Elliot N","Steven L","Maddie J","Joe M",
     "Eduardo T","Emmo O","John M","Kevin P",
@@ -77,54 +91,72 @@
     "Haprielle J","Kaedence B","Carmen C","Rico E","Hope H",
     "William V","Manas R","Derrick M","Bryan Steffens","Cass I"
   ];
-const kingstonReps = [
-  "Stephanie","Gavin","Haprielle","Kaedence","Hope",
-  "William","Derrick","Bryan","Cass"
-];
+
+  const kingstonReps = [
+    "Stephanie","Gavin","Haprielle","Kaedence","Hope",
+    "William","Derrick","Bryan","Cass"
+  ];
 
   const select = document.getElementById("salesRep");
   const status = document.getElementById("status");
+  const cityIndicator = document.getElementById("cityIndicator");
 
   // Populate dropdown
   salesReps.forEach(rep => {
     const option = document.createElement("option");
-    option.value = rep; // store full name
+    option.value = rep;
     option.textContent = rep;
     select.appendChild(option);
   });
 
-  // Convert full name to am_id: first name + first letter of last name
-function getRepId(fullName) {
-  const parts = fullName.trim().split(" ");
-  
-  if (parts.length < 2) {
-    // fallback if something weird happens
-    return fullName.charAt(0).toUpperCase() + fullName.slice(1);
+  function getRepId(fullName) {
+    const parts = fullName.trim().split(" ");
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1];
+
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
+         + lastName.charAt(0).toUpperCase();
   }
 
-  const firstName = parts[0];
-  const lastInitial = parts[1].charAt(0);
+  function getFirstName(fullName) {
+    return fullName.split(" ")[0];
+  }
 
-  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
-       + lastInitial.toUpperCase();
-}
+  function isKingstonRep(fullName) {
+    return kingstonReps.includes(getFirstName(fullName));
+  }
 
   function getMessage(fullName) {
-  const repId = getRepId(fullName);
+    const repId = getRepId(fullName);
 
-  const firstName = fullName.split(" ")[0];
+    const baseLink = isKingstonRep(fullName)
+      ? "https://getyourshowerhead.ca/free-kng"
+      : "https://getyourshowerhead.ca/free-ott";
 
-  const isKingston = kingstonReps.includes(firstName);
-
-  const baseLink = isKingston
-    ? "https://getyourshowerhead.ca/free-kng"
-    : "https://getyourshowerhead.ca/free-ott";
-
-  return `I got a new Spa Shower Head from a company in Kingston and Ottawa.
+    return `I got a new Spa Shower Head from a company in Kingston and Ottawa.
 They have given me the opportunity for any of my family or friends to get one FREE like I did. This shower head also removes chlorine from your shower. If you would like to get one just fill out their quick questionnaire and complete the test just like I did!
 ${baseLink}?am_id=${repId}`;
-}
+  }
 
+  // 🔥 Update city indicator when rep is selected
+  select.addEventListener("change", () => {
+    const repFullName = select.value;
+
+    if (!repFullName) {
+      cityIndicator.textContent = "";
+      return;
+    }
+
+    if (isKingstonRep(repFullName)) {
+      cityIndicator.textContent = "Serving Kingston";
+      cityIndicator.className = "city kingston";
+    } else {
+      cityIndicator.textContent = "Serving Ottawa";
+      cityIndicator.className = "city ottawa";
+    }
+  });
+
+  // Copy message
   document.getElementById("copyBtn").onclick = async () => {
     const repFullName = select.value;
     if (!repFullName) { alert("Please select your name"); return; }
@@ -134,7 +166,26 @@ ${baseLink}?am_id=${repId}`;
     status.textContent = "Copied! Now you can paste it anywhere.";
   };
 
-  </script>
+  // Referral prizes
+  document.getElementById("referralBtn").onclick = () => {
+    const repFullName = select.value;
+    if (!repFullName) { alert("Please select your name"); return; }
+
+    const firstName = getFirstName(repFullName);
+
+    const baseLink = isKingstonRep(repFullName)
+      ? "https://mywatertest.ca/referral-prizes-kng"
+      : "https://mywatertest.ca/referral-prizes-ott";
+
+    window.open(`${baseLink}?am_id=${firstName}`, "_blank");
+  };
+
+  // Google review
+  document.getElementById("reviewBtn").onclick = () => {
+    window.open("https://share.google/NrjPAP65Sg0cYqOVX", "_blank");
+  };
+
+</script>
 
 </body>
 </html>
